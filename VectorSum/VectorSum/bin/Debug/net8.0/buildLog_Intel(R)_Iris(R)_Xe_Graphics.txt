@@ -1,0 +1,4 @@
+1:3:23: error: expected ';' after expression
+    C[i] = A[i] + B[i]
+                      ^
+                      ;
