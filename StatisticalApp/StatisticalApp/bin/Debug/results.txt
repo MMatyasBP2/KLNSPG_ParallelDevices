@@ -1,0 +1,4 @@
+Results from 1000 measurement from 1000 samples:
+
+Sample: 1000
+Minimum: -2,7119
