@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "QEeJZkRfnn9DR8tRsiixx4Qm4t16tX73PH5jS37mX1hjFwBGQVjVnkVeGG9hNf5GuM5+jc6Pg8xeJ4HWqlApbA==",
+  "dgSpecHash": "aZz5hiipZ2QkvosIqxG1zFPi322HXTiNC7vSTpvb02zhBUrdqcfi9CNNl3gdMXWZzRoRdTWjU1S7gufbQ309kQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Matyi\\Desktop\\GPUArray\\GPUArray\\GPUArray.csproj",
+  "projectFilePath": "C:\\projects\\KLNSPG_ParallelDevices\\GPUArray\\GPUArray\\GPUArray.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Matyi\\.nuget\\packages\\cloo.clsharp\\1.0.1\\cloo.clsharp.1.0.1.nupkg.sha512",
     "C:\\Users\\Matyi\\.nuget\\packages\\mathnet.numerics\\5.0.0\\mathnet.numerics.5.0.0.nupkg.sha512"
