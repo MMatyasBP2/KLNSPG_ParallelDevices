@@ -45,6 +45,11 @@ class Program
         cpuStopwatch.Stop();
         TimeSpan averageCpuComputationTime = cpuStopwatch.Elapsed;
 
+        cpuStopwatch.Restart();
+        float cpuMedian = array.Median();
+        cpuStopwatch.Stop();
+        TimeSpan medianCpuComputationTime = cpuStopwatch.Elapsed;
+
         /// GPU part
         // OpenCL inicializálása
         ComputePlatform platform = ComputePlatform.Platforms[0];
@@ -80,6 +85,12 @@ class Program
         averageKernel.SetMemoryArgument(0, averageArrayBuffer);
         averageKernel.SetValueArgument(1, arraySize);
 
+        // Median kernel
+        ComputeKernel medianKernel = program.CreateKernel("Median");
+        ComputeBuffer<float> medianArrayBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, array);
+        medianKernel.SetMemoryArgument(0, medianArrayBuffer);
+        medianKernel.SetValueArgument(1, arraySize);
+
         // Mérjük az időt a GPU-n történő számítás elvégzéséhez
         Stopwatch gpuStopwatch = new Stopwatch();
 
@@ -112,17 +123,26 @@ class Program
         gpuStopwatch.Stop();
         TimeSpan averageGpuComputationTime = gpuStopwatch.Elapsed;
 
+        /*// Median kernel számítási idő mérése
+        gpuStopwatch.Restart();
+        gpuQueue.Execute(medianKernel, null, new long[] { arraySize }, null, null);
+        gpuQueue.ReadFromBuffer(medianArrayBuffer, ref array, true, null);
+        gpuStopwatch.Stop();
+        TimeSpan medianGpuComputationTime = gpuStopwatch.Elapsed;*/
+
         // Eredmény kiíratása
         Console.WriteLine($"Minták száma: {arraySize}");
         Console.WriteLine("CPU számítások:");
-        Console.WriteLine($"Összeg (GPU): {cpuSum}");
-        Console.WriteLine($"Számítási idő (GPU) - Összeg: {sumCpuComputationTime.TotalMilliseconds} ms");
-        Console.WriteLine($"Minimum (GPU): {cpuMin}");
-        Console.WriteLine($"Számítási idő (GPU) - Minimum: {minCpuComputationTime.TotalMilliseconds} ms");
-        Console.WriteLine($"Maximum (GPU): {cpuMax}");
-        Console.WriteLine($"Számítási idő (GPU) - Maximum: {maxCpuComputationTime.TotalMilliseconds} ms");
-        Console.WriteLine($"Átlag (GPU): {cpuAverage}");
-        Console.WriteLine($"Számítási idő (GPU) - Átlag: {averageCpuComputationTime.TotalMilliseconds} ms");
+        Console.WriteLine($"Összeg (CPU): {cpuSum}");
+        Console.WriteLine($"Számítási idő (CPU) - Összeg: {sumCpuComputationTime.TotalMilliseconds} ms");
+        Console.WriteLine($"Minimum (CPU): {cpuMin}");
+        Console.WriteLine($"Számítási idő (CPU) - Minimum: {minCpuComputationTime.TotalMilliseconds} ms");
+        Console.WriteLine($"Maximum (CPU): {cpuMax}");
+        Console.WriteLine($"Számítási idő (CPU) - Maximum: {maxCpuComputationTime.TotalMilliseconds} ms");
+        Console.WriteLine($"Átlag (CPU): {cpuAverage}");
+        Console.WriteLine($"Számítási idő (CPU) - Átlag: {averageCpuComputationTime.TotalMilliseconds} ms");
+        Console.WriteLine($"Medián (CPU): {cpuMedian}");
+        Console.WriteLine($"Számítási idő (CPU) - Medián: {medianCpuComputationTime.TotalMilliseconds} ms");
         Console.WriteLine("--------------------------------------");
         Console.WriteLine("GPU számítások:");
         Console.WriteLine($"Összeg (GPU): {array.Sum()}");
@@ -133,6 +153,8 @@ class Program
         Console.WriteLine($"Számítási idő (GPU) - Maximum: {maxGpuComputationTime.TotalMilliseconds} ms");
         Console.WriteLine($"Átlag (GPU): {array.Average()}");
         Console.WriteLine($"Számítási idő (GPU) - Átlag: {averageGpuComputationTime.TotalMilliseconds} ms");
+        /*Console.WriteLine($"Medián (GPU): {array.Median()}");
+        Console.WriteLine($"Számítási idő (GPU) - Medián: {medianGpuComputationTime.TotalMilliseconds} ms");*/
 
         // Takarítás
         sumArrayBuffer.Dispose();
