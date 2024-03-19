@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GPUArray")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+daa062f8603163cba640d6c14ee1e3a197f84a82")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fa18301a4d5a27e67a55cee89625bef77ef4a9b0")]
 [assembly: System.Reflection.AssemblyProductAttribute("GPUArray")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GPUArray")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

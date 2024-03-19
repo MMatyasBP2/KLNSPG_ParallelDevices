@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using Cloo;
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Statistics;
@@ -10,7 +7,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        const int arraySize = 200000000; // A tömb mérete
+        const int arraySize = 200000000;
         float[] array = new float[arraySize];
         float sum = 0;
 
@@ -31,6 +28,11 @@ class Program
         TimeSpan sumCpuComputationTime = cpuStopwatch.Elapsed;
 
         cpuStopwatch.Restart();
+        float cpuAverage = array.Average();
+        cpuStopwatch.Stop();
+        TimeSpan averageCpuComputationTime = cpuStopwatch.Elapsed;
+
+        cpuStopwatch.Restart();
         float cpuMin = array.Min();
         cpuStopwatch.Stop();
         TimeSpan minCpuComputationTime = cpuStopwatch.Elapsed;
@@ -41,130 +43,128 @@ class Program
         TimeSpan maxCpuComputationTime = cpuStopwatch.Elapsed;
 
         cpuStopwatch.Restart();
-        float cpuAverage = array.Average();
-        cpuStopwatch.Stop();
-        TimeSpan averageCpuComputationTime = cpuStopwatch.Elapsed;
-
-        cpuStopwatch.Restart();
         float cpuMedian = array.Median();
         cpuStopwatch.Stop();
         TimeSpan medianCpuComputationTime = cpuStopwatch.Elapsed;
 
-        /// GPU part
-        // OpenCL inicializálása
+        // GPU rész
         ComputePlatform platform = ComputePlatform.Platforms[0];
-        ComputeContextPropertyList properties = new ComputeContextPropertyList(platform);
-        ComputeContext context = new ComputeContext(ComputeDeviceTypes.Gpu, properties, null, IntPtr.Zero);
+        ComputeContext context = new ComputeContext(ComputeDeviceTypes.Gpu, new ComputeContextPropertyList(platform), null, IntPtr.Zero);
 
-        // Kernel betöltése és létrehozása
         string kernelSource = File.ReadAllText("calculations.cl");
         ComputeProgram program = new ComputeProgram(context, kernelSource);
         program.Build(null, null, null, IntPtr.Zero);
 
-        // Sum kernel
+        int workGroupSize = 256;
+        int numberOfGroups = (arraySize + workGroupSize - 1) / workGroupSize;
+
         ComputeKernel sumKernel = program.CreateKernel("Sum");
-        ComputeBuffer<float> sumArrayBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, array);
-        sumKernel.SetMemoryArgument(0, sumArrayBuffer);
-        sumKernel.SetValueArgument(1, arraySize);
+        ComputeBuffer<float> arrayBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.CopyHostPointer, array);
+        ComputeBuffer<float> resultBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.WriteOnly, numberOfGroups);
+        sumKernel.SetMemoryArgument(0, arrayBuffer);
+        sumKernel.SetMemoryArgument(1, resultBuffer);
+        sumKernel.SetValueArgument(2, arraySize);
 
-        // Min kernel
-        ComputeKernel minKernel = program.CreateKernel("Min");
-        ComputeBuffer<float> minArrayBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, array);
-        minKernel.SetMemoryArgument(0, minArrayBuffer);
-        minKernel.SetValueArgument(1, arraySize);
+        ComputeCommandQueue queue = new ComputeCommandQueue(context, context.Devices[0], ComputeCommandQueueFlags.None);
 
-        // Max kernel
-        ComputeKernel maxKernel = program.CreateKernel("Max");
-        ComputeBuffer<float> maxArrayBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, array);
-        maxKernel.SetMemoryArgument(0, maxArrayBuffer);
-        maxKernel.SetValueArgument(1, arraySize);
-
-        // Average kernel
-        ComputeKernel averageKernel = program.CreateKernel("Average");
-        ComputeBuffer<float> averageArrayBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, array);
-        averageKernel.SetMemoryArgument(0, averageArrayBuffer);
-        averageKernel.SetValueArgument(1, arraySize);
-
-        // Median kernel
-        ComputeKernel medianKernel = program.CreateKernel("Median");
-        ComputeBuffer<float> medianArrayBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.CopyHostPointer, array);
-        medianKernel.SetMemoryArgument(0, medianArrayBuffer);
-        medianKernel.SetValueArgument(1, arraySize);
-
-        // Mérjük az időt a GPU-n történő számítás elvégzéséhez
         Stopwatch gpuStopwatch = new Stopwatch();
-
-        // Sum kernel számítási idő mérése
         gpuStopwatch.Start();
-        ComputeCommandQueue gpuQueue = new ComputeCommandQueue(context, context.Devices[0], ComputeCommandQueueFlags.None);
-        gpuQueue.Execute(sumKernel, null, new long[] { arraySize }, null, null);
-        gpuQueue.ReadFromBuffer(sumArrayBuffer, ref array, true, null);
+
+        queue.Execute(sumKernel, null, new long[] { arraySize }, new long[] { workGroupSize }, null);
+
+        float[] result = new float[numberOfGroups];
+        queue.ReadFromBuffer(resultBuffer, ref result, true, null);
+
         gpuStopwatch.Stop();
         TimeSpan sumGpuComputationTime = gpuStopwatch.Elapsed;
 
-        // Min kernel számítási idő mérése
+        float gpuSum = 0;
+        foreach (float partialSum in result)
+        {
+            gpuSum += partialSum;
+        }
+
+        ComputeKernel averageKernel = program.CreateKernel("CalculateSumAndAverage");
+        ComputeBuffer<float> averageResultBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.WriteOnly, numberOfGroups);
+        averageKernel.SetMemoryArgument(0, arrayBuffer);
+        averageKernel.SetMemoryArgument(1, averageResultBuffer);
+        averageKernel.SetValueArgument(2, arraySize);
+
         gpuStopwatch.Restart();
-        gpuQueue.Execute(minKernel, null, new long[] { arraySize }, null, null);
-        gpuQueue.ReadFromBuffer(minArrayBuffer, ref array, true, null);
+        queue.Execute(averageKernel, null, new long[] { arraySize }, new long[] { workGroupSize }, null);
+
+        float[] sumResults = new float[numberOfGroups];
+        queue.ReadFromBuffer(averageResultBuffer, ref sumResults, true, null);
+        gpuStopwatch.Stop();
+
+        float totalSum = 0;
+        foreach (float groupSum in sumResults)
+        {
+            totalSum += groupSum;
+        }
+        float average = totalSum / arraySize;
+        TimeSpan avgGpuComputationTime = gpuStopwatch.Elapsed;
+
+        ComputeKernel minKernel = program.CreateKernel("CalculateMin");
+        ComputeBuffer<float> minResultBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.WriteOnly, numberOfGroups);
+        minKernel.SetMemoryArgument(0, arrayBuffer);
+        minKernel.SetMemoryArgument(1, minResultBuffer);
+        minKernel.SetValueArgument(2, arraySize);
+
+        ComputeKernel maxKernel = program.CreateKernel("CalculateMax");
+        ComputeBuffer<float> maxResultBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.WriteOnly, numberOfGroups);
+        maxKernel.SetMemoryArgument(0, arrayBuffer);
+        maxKernel.SetMemoryArgument(1, maxResultBuffer);
+        maxKernel.SetValueArgument(2, arraySize);
+
+        gpuStopwatch.Restart();
+        queue.Execute(minKernel, null, new long[] { arraySize }, new long[] { workGroupSize }, null);
+        float[] minResults = new float[numberOfGroups];
+        queue.ReadFromBuffer(minResultBuffer, ref minResults, true, null);
         gpuStopwatch.Stop();
         TimeSpan minGpuComputationTime = gpuStopwatch.Elapsed;
 
-        // Max kernel számítási idő mérése
         gpuStopwatch.Restart();
-        gpuQueue.Execute(maxKernel, null, new long[] { arraySize }, null, null);
-        gpuQueue.ReadFromBuffer(maxArrayBuffer, ref array, true, null);
+        queue.Execute(maxKernel, null, new long[] { arraySize }, new long[] { workGroupSize }, null);
+        float[] maxResults = new float[numberOfGroups];
+        queue.ReadFromBuffer(maxResultBuffer, ref maxResults, true, null);
         gpuStopwatch.Stop();
         TimeSpan maxGpuComputationTime = gpuStopwatch.Elapsed;
 
-        // Average kernel számítási idő mérése
-        gpuStopwatch.Restart();
-        gpuQueue.Execute(averageKernel, null, new long[] { arraySize }, null, null);
-        gpuQueue.ReadFromBuffer(averageArrayBuffer, ref array, true, null);
-        gpuStopwatch.Stop();
-        TimeSpan averageGpuComputationTime = gpuStopwatch.Elapsed;
+        float gpuMin = minResults.Min();
+        float gpuMax = maxResults.Max();
 
-        /*// Median kernel számítási idő mérése
-        gpuStopwatch.Restart();
-        gpuQueue.Execute(medianKernel, null, new long[] { arraySize }, null, null);
-        gpuQueue.ReadFromBuffer(medianArrayBuffer, ref array, true, null);
-        gpuStopwatch.Stop();
-        TimeSpan medianGpuComputationTime = gpuStopwatch.Elapsed;*/
-
-        // Eredmény kiíratása
+        // Eredmények kiírása
         Console.WriteLine($"Minták száma: {arraySize}");
         Console.WriteLine("CPU számítások:");
         Console.WriteLine($"Összeg (CPU): {cpuSum}");
         Console.WriteLine($"Számítási idő (CPU) - Összeg: {sumCpuComputationTime.TotalMilliseconds} ms");
+        Console.WriteLine($"Átlag (CPU): {cpuAverage}");
+        Console.WriteLine($"Számítási idő (CPU) - Átlag: {averageCpuComputationTime.TotalMilliseconds} ms");
         Console.WriteLine($"Minimum (CPU): {cpuMin}");
         Console.WriteLine($"Számítási idő (CPU) - Minimum: {minCpuComputationTime.TotalMilliseconds} ms");
         Console.WriteLine($"Maximum (CPU): {cpuMax}");
         Console.WriteLine($"Számítási idő (CPU) - Maximum: {maxCpuComputationTime.TotalMilliseconds} ms");
-        Console.WriteLine($"Átlag (CPU): {cpuAverage}");
-        Console.WriteLine($"Számítási idő (CPU) - Átlag: {averageCpuComputationTime.TotalMilliseconds} ms");
         Console.WriteLine($"Medián (CPU): {cpuMedian}");
         Console.WriteLine($"Számítási idő (CPU) - Medián: {medianCpuComputationTime.TotalMilliseconds} ms");
         Console.WriteLine("--------------------------------------");
         Console.WriteLine("GPU számítások:");
-        Console.WriteLine($"Összeg (GPU): {array.Sum()}");
+        Console.WriteLine($"Összeg (GPU): {gpuSum}");
         Console.WriteLine($"Számítási idő (GPU) - Összeg: {sumGpuComputationTime.TotalMilliseconds} ms");
-        Console.WriteLine($"Minimum (GPU): {array.Min()}");
+        Console.WriteLine($"Átlag (GPU): {average}");
+        Console.WriteLine($"Számítási idő (GPU) - Átlag: {avgGpuComputationTime.TotalMilliseconds} ms");
+        Console.WriteLine($"Minimum (GPU): {gpuMin}");
         Console.WriteLine($"Számítási idő (GPU) - Minimum: {minGpuComputationTime.TotalMilliseconds} ms");
-        Console.WriteLine($"Maximum (GPU): {array.Max()}");
+        Console.WriteLine($"Maximum (GPU): {gpuMax}");
         Console.WriteLine($"Számítási idő (GPU) - Maximum: {maxGpuComputationTime.TotalMilliseconds} ms");
-        Console.WriteLine($"Átlag (GPU): {array.Average()}");
-        Console.WriteLine($"Számítási idő (GPU) - Átlag: {averageGpuComputationTime.TotalMilliseconds} ms");
-        /*Console.WriteLine($"Medián (GPU): {array.Median()}");
-        Console.WriteLine($"Számítási idő (GPU) - Medián: {medianGpuComputationTime.TotalMilliseconds} ms");*/
 
         // Takarítás
-        sumArrayBuffer.Dispose();
-        minArrayBuffer.Dispose();
-        maxArrayBuffer.Dispose();
-        averageArrayBuffer.Dispose();
+        arrayBuffer.Dispose();
+        resultBuffer.Dispose();
         sumKernel.Dispose();
+        averageKernel.Dispose();
         minKernel.Dispose();
         maxKernel.Dispose();
-        averageKernel.Dispose();
         program.Dispose();
         context.Dispose();
     }
