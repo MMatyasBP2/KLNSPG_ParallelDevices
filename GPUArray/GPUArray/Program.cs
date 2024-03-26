@@ -53,7 +53,16 @@ class Program
 
         string kernelSource = File.ReadAllText("calculations.cl");
         ComputeProgram program = new ComputeProgram(context, kernelSource);
-        program.Build(null, null, null, IntPtr.Zero);
+
+        try
+        {
+            program.Build(null, null, null, IntPtr.Zero);
+        }
+        catch (Exception)
+        {
+            string buildLog = program.GetBuildLog(context.Devices[0]);
+            Console.WriteLine(buildLog);
+        }
 
         int workGroupSize = 256;
         int numberOfGroups = (arraySize + workGroupSize - 1) / workGroupSize;
@@ -134,6 +143,22 @@ class Program
         float gpuMin = minResults.Min();
         float gpuMax = maxResults.Max();
 
+        ComputeKernel medianKernel = program.CreateKernel("CalcMedian");
+        ComputeBuffer<float> medianResultBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.WriteOnly, 1);
+        medianKernel.SetMemoryArgument(0, arrayBuffer);
+        medianKernel.SetMemoryArgument(1, medianResultBuffer);
+        medianKernel.SetValueArgument(2, arraySize);
+
+        gpuStopwatch.Restart();
+        queue.Execute(medianKernel, null, new long[] { arraySize }, null, null);
+
+        float[] medianResult = new float[1];
+        queue.ReadFromBuffer(medianResultBuffer, ref medianResult, true, null);
+        gpuStopwatch.Stop();
+        TimeSpan medianGpuComputationTime = gpuStopwatch.Elapsed;
+
+        float gpuMedian = medianResult[0];
+
         // Eredmények kiírása
         Console.WriteLine($"Minták száma: {arraySize}");
         Console.WriteLine("CPU számítások:");
@@ -157,6 +182,8 @@ class Program
         Console.WriteLine($"Számítási idő (GPU) - Minimum: {minGpuComputationTime.TotalMilliseconds} ms");
         Console.WriteLine($"Maximum (GPU): {gpuMax}");
         Console.WriteLine($"Számítási idő (GPU) - Maximum: {maxGpuComputationTime.TotalMilliseconds} ms");
+        Console.WriteLine($"Medián (GPU): {gpuMedian}");
+        Console.WriteLine($"Számítási idő (GPU) - Maximum: {medianGpuComputationTime.TotalMilliseconds} ms");
 
         // Takarítás
         arrayBuffer.Dispose();
@@ -165,6 +192,7 @@ class Program
         averageKernel.Dispose();
         minKernel.Dispose();
         maxKernel.Dispose();
+        medianKernel.Dispose();
         program.Dispose();
         context.Dispose();
     }

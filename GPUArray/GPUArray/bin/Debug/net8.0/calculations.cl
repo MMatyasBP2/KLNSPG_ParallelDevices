@@ -3,7 +3,7 @@ __kernel void Sum(__global const float* array, __global float* result, const int
     int local_id = get_local_id(0);
     int group_size = get_local_size(0);
 
-    __local float localSum[256]; // Feltételezve, hogy a work group mérete max 256
+    __local float localSum[256];
 
     // Kezdeti összeg 0-ra inicializálása
     float sum = 0.0;
@@ -122,41 +122,87 @@ __kernel void CalculateSumAndAverage(__global const float* array, __global float
     }
 }
 
-__kernel void bitonicSortAndCalculateMedian(__global float* data, int length) {
-    int idx = get_global_id(0);
-
-    // Egyszerű bitonikus rendezés egy adott elemszámra.
-    // Megjegyzés: Ez a kód csak illusztrációs célú, és nem alkalmazható közvetlenül.
-    for (int size = 2; size <= length; size *= 2) {
-        for (int stride = size / 2; stride > 0; stride /= 2) {
-            int index = (idx / stride) & 1;
-            if (index == 0) {
-                if ((idx & size) == 0 && data[idx] > data[idx + stride]) {
-                    // Csere
-                    float temp = data[idx];
-                    data[idx] = data[idx + stride];
-                    data[idx + stride] = temp;
-                }
-            } else {
-                if ((idx & size) != 0 && data[idx] < data[idx + stride]) {
-                    // Csere
-                    float temp = data[idx];
-                    data[idx] = data[idx + stride];
-                    data[idx + stride] = temp;
-                }
-            }
+float Partition(__global float* arr, const int left, const int right) {
+    float pivotValue = arr[right];
+    int i = left - 1;
+    
+    for (int j = left; j < right; ++j) {
+        if (arr[j] <= pivotValue) {
+            i++;
+            float temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
         }
     }
+    
+    float temp = arr[i + 1];
+    arr[i + 1] = arr[right];
+    arr[right] = temp;
+    return i + 1;
+}
 
-    // Medián számítása
-    barrier(CLK_GLOBAL_MEM_FENCE);
-    if (idx == 0) {
-        float median;
-        if (length % 2 == 0) {
-            median = (data[length / 2 - 1] + data[length / 2]) / 2.0;
-        } else {
-            median = data[length / 2];
+void QuickSelect(__global float* arr, int left, int right, const int k) {
+    while (left < right) {
+        float pivotValue = arr[right];
+        int i = left - 1;
+
+        for (int j = left; j < right; ++j) {
+            if (arr[j] <= pivotValue) {
+                i++;
+                float temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
         }
-        // Tegyük fel, hogy van egy módszerünk az eredmény visszaküldésére.
+
+        float temp = arr[i + 1];
+        arr[i + 1] = arr[right];
+        arr[right] = temp;
+
+        int pivotIndex = i + 1;
+
+        if (k == pivotIndex) {
+            break;
+        } else if (k < pivotIndex) {
+            right = pivotIndex - 1;
+        } else {
+            left = pivotIndex + 1;
+        }
+    }
+}
+
+__kernel void CalcMedian(__global float* data, __global float* result, const int arraySize) {
+    int global_id = get_global_id(0);
+    int local_id = get_local_id(0);
+    int group_id = get_group_id(0);
+    int group_size = get_local_size(0);
+    
+    // Az aktuális rész kezdőindexe
+    int start = group_id * group_size;
+    // Az aktuális rész végindexe
+    int end = min(start + group_size, arraySize) - 1;
+    
+    // Lokális tömb az aktuális rész adatok tárolására
+    __local float localData[256];
+    
+    // Adatok másolása a lokális tömbbe
+    for (int i = start + local_id; i <= end; i += group_size) {
+        localData[i - start] = data[i];
+    }
+    
+    // Medián számítás az aktuális rész adatokon
+    QuickSelect(data, start, end, (end - start) / 2);
+    
+    // Mediánok másolása a globális memóriába
+    if (local_id == 0) {
+        result[group_id] = data[start + (end - start) / 2];
+    }
+    
+    // Szinkronizáció a work-groupon belül
+    barrier(CLK_LOCAL_MEM_FENCE);
+    
+    // Az első work-group kiszámítja a részmediánok globális mediánját
+    if (group_id == 0) {
+        QuickSelect(result, 0, get_num_groups(0) - 1, get_num_groups(0) / 2);
     }
 }
