@@ -143,6 +143,12 @@ class Program
         float gpuMin = minResults.Min();
         float gpuMax = maxResults.Max();
 
+        ComputeKernel sortKernel = program.CreateKernel("SortArray");
+        sortKernel.SetMemoryArgument(0, arrayBuffer);
+        sortKernel.SetValueArgument(1, arraySize);
+        queue.Execute(sortKernel, null, new long[] { arraySize }, null, null);
+        queue.ReadFromBuffer(arrayBuffer, ref array, true, null);
+
         ComputeKernel medianKernel = program.CreateKernel("CalcMedian");
         ComputeBuffer<float> medianResultBuffer = new ComputeBuffer<float>(context, ComputeMemoryFlags.WriteOnly, 1);
         medianKernel.SetMemoryArgument(0, arrayBuffer);
@@ -151,7 +157,6 @@ class Program
 
         gpuStopwatch.Restart();
         queue.Execute(medianKernel, null, new long[] { arraySize }, null, null);
-
         float[] medianResult = new float[1];
         queue.ReadFromBuffer(medianResultBuffer, ref medianResult, true, null);
         gpuStopwatch.Stop();

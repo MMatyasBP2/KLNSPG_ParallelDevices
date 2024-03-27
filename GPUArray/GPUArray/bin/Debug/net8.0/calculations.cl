@@ -122,87 +122,25 @@ __kernel void CalculateSumAndAverage(__global const float* array, __global float
     }
 }
 
-float Partition(__global float* arr, const int left, const int right) {
-    float pivotValue = arr[right];
-    int i = left - 1;
-    
-    for (int j = left; j < right; ++j) {
-        if (arr[j] <= pivotValue) {
-            i++;
-            float temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
-        }
-    }
-    
-    float temp = arr[i + 1];
-    arr[i + 1] = arr[right];
-    arr[right] = temp;
-    return i + 1;
-}
-
-void QuickSelect(__global float* arr, int left, int right, const int k) {
-    while (left < right) {
-        float pivotValue = arr[right];
-        int i = left - 1;
-
-        for (int j = left; j < right; ++j) {
-            if (arr[j] <= pivotValue) {
-                i++;
-                float temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
+__kernel void SortArray(__global float* data, const int length) {
+    // Bubble sort algorithm for simplicity, replace with more efficient sorting algorithm if needed
+    for (int i = 0; i < length - 1; i++) {
+        for (int j = 0; j < length - i - 1; j++) {
+            if (data[j] > data[j + 1]) {
+                float temp = data[j];
+                data[j] = data[j + 1];
+                data[j + 1] = temp;
             }
         }
-
-        float temp = arr[i + 1];
-        arr[i + 1] = arr[right];
-        arr[right] = temp;
-
-        int pivotIndex = i + 1;
-
-        if (k == pivotIndex) {
-            break;
-        } else if (k < pivotIndex) {
-            right = pivotIndex - 1;
-        } else {
-            left = pivotIndex + 1;
-        }
     }
 }
 
-__kernel void CalcMedian(__global float* data, __global float* result, const int arraySize) {
-    int global_id = get_global_id(0);
-    int local_id = get_local_id(0);
-    int group_id = get_group_id(0);
-    int group_size = get_local_size(0);
-    
-    // Az aktuális rész kezdőindexe
-    int start = group_id * group_size;
-    // Az aktuális rész végindexe
-    int end = min(start + group_size, arraySize) - 1;
-    
-    // Lokális tömb az aktuális rész adatok tárolására
-    __local float localData[256];
-    
-    // Adatok másolása a lokális tömbbe
-    for (int i = start + local_id; i <= end; i += group_size) {
-        localData[i - start] = data[i];
-    }
-    
-    // Medián számítás az aktuális rész adatokon
-    QuickSelect(data, start, end, (end - start) / 2);
-    
-    // Mediánok másolása a globális memóriába
-    if (local_id == 0) {
-        result[group_id] = data[start + (end - start) / 2];
-    }
-    
-    // Szinkronizáció a work-groupon belül
-    barrier(CLK_LOCAL_MEM_FENCE);
-    
-    // Az első work-group kiszámítja a részmediánok globális mediánját
-    if (group_id == 0) {
-        QuickSelect(result, 0, get_num_groups(0) - 1, get_num_groups(0) / 2);
+__kernel void CalcMedian(__global float* sortedData, __global float* median, const int length) {
+    int middle = length / 2;
+
+    if (length % 2 == 0) {
+        median[0] = (sortedData[middle - 1] + sortedData[middle]) / 2.0f;
+    } else {
+        median[0] = sortedData[middle];
     }
 }
