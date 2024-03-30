@@ -48,7 +48,8 @@ namespace GPUStatistics.GPUHandling
         #region Calculations
         public (float, double) CalculateSum(float[] array)
         {
-            long arraySize = (long)MainWindow.main.SizeSlider.Value;
+            long arraySize = 0;
+            Application.Current.Dispatcher.Invoke(new Action(() => { arraySize = (long)MainWindow.main.SizeSlider.Value; }));
             int numberOfGroups = ((int)arraySize + WorkGroupSize - 1) / WorkGroupSize;
             ComputeKernel sumKernel = Program.CreateKernel("Sum");
             ComputeBuffer<float> arrayBuffer = new ComputeBuffer<float>(Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.CopyHostPointer, array);

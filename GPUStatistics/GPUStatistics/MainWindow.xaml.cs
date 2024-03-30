@@ -57,21 +57,16 @@ namespace GPUStatistics
                     sum += array[i];
                 }
 
-                await Task.Run(() => {
-                    (float, double) CPUSum = CPUCalculations.CalculateSum(array);
-                    (float, double) GPUSum = CPUCalculations.CalculateSum(array);
+                Task<(float, double)> cpuTask = Task.Run(() => CPUCalculations.CalculateSum(array));
 
+                (float cpuSumResult, double cpuSumTime) = await cpuTask;
+                ResultBox.AppendText($"Sum (CPU): {cpuSumResult}\n" +
+                                      $"Timespan (CPU): {cpuSumTime}\n\n");
 
-                    (float cpuSumResult, double cpuSumTime) = CPUSum;
-                    (float gpuSumResult, double gpuSumTime) = GPUSum;
-
-                    Application.Current.Dispatcher.Invoke(new Action(() => {
-                        ResultBox.AppendText($"Sum (CPU): {cpuSumResult}\n" +
-                                         $"Timespan (CPU): {cpuSumTime}\n");
-                        ResultBox.AppendText($"\nSum (GPU): {gpuSumResult}\n" +
-                                             $"Timespan (GPU): {gpuSumTime}");
-                    }));
-                });
+                Task<(float, double)> gpuTask = Task.Run(() => GPUHandler.CalculateSum(array));
+                (float gpuSumResult, double gpuSumTime) = await gpuTask;
+                ResultBox.AppendText($"Sum (GPU): {gpuSumResult}\n" +
+                                      $"Timespan (GPU): {gpuSumTime}");
 
                 IsInSequence = false;
                 AsyncBar.Visibility = Visibility.Collapsed;
@@ -79,6 +74,8 @@ namespace GPUStatistics
             catch (Exception ex)
             {
                 IsInSequence = false;
+                AsyncBar.Visibility = Visibility.Collapsed;
+                ResultBox.Document.Blocks.Clear();
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
