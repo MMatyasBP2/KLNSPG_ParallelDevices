@@ -120,6 +120,13 @@ namespace GPUStatistics.GPUHandling
             return maxResult.Max();
         }
 
+        private float CalculateMedianFromResultBuffer(ComputeBuffer<float> resultBuffer, ComputeCommandQueue queue, long arraySize)
+        {
+            float[] maxResult = new float[CalculateNumberOfGroups(arraySize)];
+            queue.ReadFromBuffer(resultBuffer, ref maxResult, true, null);
+            return maxResult[0];
+        }
+
         private double GetGpuComputationTime(Stopwatch gpuStopwatch) => gpuStopwatch.Elapsed.TotalMilliseconds;
 
         private void SetGpuComputationTime(Stopwatch gpuStopwatch)
@@ -266,7 +273,30 @@ namespace GPUStatistics.GPUHandling
 
         public (float, double) CalculateMedian(float[] array)
         {
-            throw new NotImplementedException();
+            try
+            {
+                long arraySize = array.Length;
+                int numberOfGroups = CalculateNumberOfGroups(arraySize);
+                ComputeKernel medianKernel = CreateKernel("CalcMedian", array, arraySize, numberOfGroups);
+                ComputeBuffer<float> arrayBuffer = CreateArrayBuffer(array);
+                ComputeBuffer<float> resultBuffer = CreateResultBuffer(numberOfGroups);
+                SetMemoryArgument(medianKernel, arrayBuffer, resultBuffer, arraySize);
+
+                ComputeCommandQueue queue = new ComputeCommandQueue(Context, Context.Devices[0], ComputeCommandQueueFlags.None);
+                Stopwatch sw = new Stopwatch();
+
+                ExecuteKernel(medianKernel, arrayBuffer, resultBuffer, queue, arraySize, numberOfGroups, sw);
+
+                float median = CalculateMedianFromResultBuffer(resultBuffer, queue, arraySize);
+                double medianGpuComputationTime = GetGpuComputationTime(sw);
+                CleanupResources(medianKernel, arrayBuffer, resultBuffer);
+
+                return (median, medianGpuComputationTime);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         #endregion

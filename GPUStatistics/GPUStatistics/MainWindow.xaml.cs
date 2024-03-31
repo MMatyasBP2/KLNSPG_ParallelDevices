@@ -98,6 +98,16 @@ namespace GPUStatistics
                 ResultBox.AppendText($"Maximum (GPU): {gpuMaxResult}\n" +
                                       $"Timespan (GPU): {gpuMaxTime}");
 
+                Task<(float, double)> cpuMedianTask = Task.Run(() => CPUCalculations.CalculateMedian(array));
+                (float cpuMedianResult, double cpuMedianTime) = await cpuMedianTask;
+                ResultBox.AppendText($"\nMedian (CPU): {cpuMedianResult}\n" +
+                                      $"Timespan (CPU): {cpuMedianTime}\n");
+
+                Task<(float, double)> gpuMedianTask = Task.Run(() => GPUHandler.CalculateMedian(array));
+                (float gpuMedianResult, double gpuMedianTime) = await gpuMedianTask;
+                ResultBox.AppendText($"Median (GPU): {gpuMedianResult}\n" +
+                                      $"Timespan (GPU): {gpuMedianTime}");
+
                 IsInSequence = false;
                 AsyncBar.Visibility = Visibility.Collapsed;
             }
