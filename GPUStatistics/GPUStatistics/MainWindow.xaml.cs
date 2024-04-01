@@ -24,7 +24,8 @@ namespace GPUStatistics
                 GPUHandler = new GPUHandler(256);
                 CPUCalculations = new CPUCalculations();
                 main = this;
-                AsyncBar.Visibility = Visibility.Collapsed;
+
+                HideComponents();
                 Trace.Listeners.Add(new ProcessListener());
             }
             catch (Exception ex)
@@ -58,6 +59,8 @@ namespace GPUStatistics
                 }
 
                 Task<(float, double)> cpuSumTask = Task.Run(() => CPUCalculations.CalculateSum(array));
+
+                EnableComponents();
 
                 (float cpuSumResult, double cpuSumTime) = await cpuSumTask;
                 ResultBox.AppendText($"Sum (CPU): {cpuSumResult}\n" +
@@ -118,6 +121,72 @@ namespace GPUStatistics
                 ResultBox.Document.Blocks.Clear();
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void HideComponents()
+        {
+            CPUResultLabel.Visibility = Visibility.Collapsed;
+            GPUResultLabel.Visibility = Visibility.Collapsed;
+            SumLabel.Visibility = Visibility.Collapsed;
+            AvgLabel.Visibility = Visibility.Collapsed;
+            MinLabel.Visibility = Visibility.Collapsed;
+            MaxLabel.Visibility = Visibility.Collapsed;
+            MedianLabel.Visibility = Visibility.Collapsed;
+            CPUSumResultBox.Visibility = Visibility.Collapsed;
+            GPUSumResultBox.Visibility = Visibility.Collapsed;
+            CPUAvgResultBox.Visibility = Visibility.Collapsed;
+            GPUAvgResultBox.Visibility = Visibility.Collapsed;
+            CPUMinResultBox.Visibility = Visibility.Collapsed;
+            GPUMinResultBox.Visibility = Visibility.Collapsed;
+            CPUMaxResultBox.Visibility = Visibility.Collapsed;
+            GPUMaxResultBox.Visibility = Visibility.Collapsed;
+            CPUMedianResultBox.Visibility = Visibility.Collapsed;
+            GPUMedianResultBox.Visibility = Visibility.Collapsed;
+
+            CPUSumTimeBox.Visibility = Visibility.Collapsed;
+            GPUSumTimeBox.Visibility = Visibility.Collapsed;
+            CPUAvgTimeBox.Visibility = Visibility.Collapsed;
+            GPUAvgTimeBox.Visibility = Visibility.Collapsed;
+            CPUMinTimeBox.Visibility = Visibility.Collapsed;
+            GPUMinTimeBox.Visibility = Visibility.Collapsed;
+            CPUMaxTimeBox.Visibility = Visibility.Collapsed;
+            GPUMaxTimeBox.Visibility = Visibility.Collapsed;
+            CPUMedianTimeBox.Visibility = Visibility.Collapsed;
+            GPUMedianTimeBox.Visibility = Visibility.Collapsed;
+            AsyncBar.Visibility = Visibility.Collapsed;
+        }
+
+        private void EnableComponents()
+        {
+            CPUResultLabel.Visibility = Visibility.Visible;
+            GPUResultLabel.Visibility = Visibility.Visible;
+            SumLabel.Visibility = Visibility.Visible;
+            AvgLabel.Visibility = Visibility.Visible;
+            MinLabel.Visibility = Visibility.Visible;
+            MaxLabel.Visibility = Visibility.Visible;
+            MedianLabel.Visibility = Visibility.Visible;
+            CPUSumResultBox.Visibility = Visibility.Visible;
+            GPUSumResultBox.Visibility = Visibility.Visible;
+            CPUAvgResultBox.Visibility = Visibility.Visible;
+            GPUAvgResultBox.Visibility = Visibility.Visible;
+            CPUMinResultBox.Visibility = Visibility.Visible;
+            GPUMinResultBox.Visibility = Visibility.Visible;
+            CPUMaxResultBox.Visibility = Visibility.Visible;
+            GPUMaxResultBox.Visibility = Visibility.Visible;
+            CPUMedianResultBox.Visibility = Visibility.Visible;
+            GPUMedianResultBox.Visibility = Visibility.Visible;
+
+            CPUSumTimeBox.Visibility = Visibility.Visible;
+            GPUSumTimeBox.Visibility = Visibility.Visible;
+            CPUAvgTimeBox.Visibility = Visibility.Visible;
+            GPUAvgTimeBox.Visibility = Visibility.Visible;
+            CPUMinTimeBox.Visibility = Visibility.Visible;
+            GPUMinTimeBox.Visibility = Visibility.Visible;
+            CPUMaxTimeBox.Visibility = Visibility.Visible;
+            GPUMaxTimeBox.Visibility = Visibility.Visible;
+            CPUMedianTimeBox.Visibility = Visibility.Visible;
+            GPUMedianTimeBox.Visibility = Visibility.Visible;
+            AsyncBar.Visibility = Visibility.Visible;
         }
     }
 }

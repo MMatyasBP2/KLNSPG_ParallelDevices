@@ -17,12 +17,33 @@
         <TextBlock Grid.Row="1" HorizontalAlignment="Center" Margin="0,5,0,0" VerticalAlignment="Top" Text="{Binding ElementName=SizeSlider, Path=Value, StringFormat={}{0:N0}}" FontFamily="Times New Roman" FontWeight="Bold" FontSize="16" />
         <Button x:Name="StartButton" Content="START MEASUREMENT" HorizontalAlignment="Center" Margin="0,52,0,0" Grid.Row="1" VerticalAlignment="Top" Height="49" Width="243" FontFamily="Times New Roman" FontSize="16" Click="StartButton_Click"/>
         <ProgressBar x:Name="AsyncBar" HorizontalAlignment="Center" Height="19" Margin="0,175,0,0" Grid.Row="1" VerticalAlignment="Top" Width="699"/>
-        <RichTextBox x:Name="ResultBox" IsReadOnly="True" Grid.Row="1" Margin="0,248,0,-340" Background="{x:Null}" FontFamily="Times New Roman" FontWeight="Bold" FontSize="8">
-            <FlowDocument>
-                <Paragraph>
-                    <Run Text=""/>
-                </Paragraph>
-            </FlowDocument>
-        </RichTextBox>
+        <Label x:Name="CPUResultLabel" Content="CPU results:" HorizontalAlignment="Left" Margin="233,239,0,0" Grid.Row="1" VerticalAlignment="Top" FontFamily="Times New Roman"/>
+        <Label x:Name="GPUResultLabel" Content="GPU results:" HorizontalAlignment="Left" Margin="859,239,0,0" Grid.Row="1" VerticalAlignment="Top" FontFamily="Times New Roman"/>
+        <Label x:Name="SumLabel" Content="Sum:" HorizontalAlignment="Left" Margin="85,282,0,0" Grid.Row="1" VerticalAlignment="Top" FontFamily="Times New Roman"/>
+        <Label x:Name="AvgLabel" Content="Average:" HorizontalAlignment="Left" Margin="83,334,0,0" Grid.Row="1" VerticalAlignment="Top" FontFamily="Times New Roman"/>
+        <Label x:Name="MinLabel" Content="Minimum:" HorizontalAlignment="Left" Margin="83,390,0,0" Grid.Row="1" VerticalAlignment="Top" FontFamily="Times New Roman"/>
+        <Label x:Name="MaxLabel" Content="Maximum:" HorizontalAlignment="Left" Margin="83,444,0,0" Grid.Row="1" VerticalAlignment="Top" FontFamily="Times New Roman"/>
+        <Label x:Name="MedianLabel" Content="Median:" HorizontalAlignment="Left" Margin="85,498,0,0" Grid.Row="1" VerticalAlignment="Top" FontFamily="Times New Roman"/>
+        <TextBox x:Name="CPUSumResultBox" HorizontalAlignment="Left" Margin="209,285,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUSumResultBox" HorizontalAlignment="Left" Margin="835,285,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="CPUAvgResultBox" HorizontalAlignment="Left" Margin="209,337,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUAvgResultBox" HorizontalAlignment="Left" Margin="835,337,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="CPUMinResultBox" HorizontalAlignment="Left" Margin="209,393,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUMinResultBox" HorizontalAlignment="Left" Margin="835,393,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="CPUMaxResultBox" HorizontalAlignment="Left" Margin="209,447,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUMaxResultBox" HorizontalAlignment="Left" Margin="835,447,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="CPUMedianResultBox" HorizontalAlignment="Left" Margin="209,501,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUMedianResultBox" HorizontalAlignment="Left" Margin="835,501,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+
+        <TextBox x:Name="CPUSumTimeBox" HorizontalAlignment="Left" Margin="334,285,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUSumTimeBox" HorizontalAlignment="Left" Margin="960,285,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="CPUAvgTimeBox" HorizontalAlignment="Left" Margin="334,337,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUAvgTimeBox" HorizontalAlignment="Left" Margin="960,337,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="CPUMinTimeBox" HorizontalAlignment="Left" Margin="334,393,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUMinTimeBox" HorizontalAlignment="Left" Margin="960,393,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="CPUMaxTimeBox" HorizontalAlignment="Left" Margin="334,447,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUMaxTimeBox" HorizontalAlignment="Left" Margin="960,447,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="CPUMedianTimeBox" HorizontalAlignment="Left" Margin="334,501,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
+        <TextBox x:Name="GPUMedianTimeBox" HorizontalAlignment="Left" Margin="960,501,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Times New Roman" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14"/>
     </Grid>
 </Window>
