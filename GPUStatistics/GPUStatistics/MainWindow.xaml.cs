@@ -43,9 +43,10 @@ namespace GPUStatistics
                     return;
 
                 IsInSequence = true;
+                HideComponents();
+
                 AsyncBar.Visibility = Visibility.Visible;
                 AsyncBar.Value = 1;
-                ResultBox.Document.Blocks.Clear();
 
                 long arraySize = (long)SizeSlider.Value;
                 float[] array = new float[arraySize];
@@ -63,53 +64,63 @@ namespace GPUStatistics
                 EnableComponents();
 
                 (float cpuSumResult, double cpuSumTime) = await cpuSumTask;
-                ResultBox.AppendText($"Sum (CPU): {cpuSumResult}\n" +
-                                      $"Timespan (CPU): {cpuSumTime}\n\n");
+
+                CPUSumResultBox.Text = cpuSumResult.ToString();
+                CPUSumTimeBox.Text = cpuSumTime.ToString();
 
                 Task<(float, double)> gpuSumTask = Task.Run(() => GPUHandler.CalculateSum(array));
                 (float gpuSumResult, double gpuSumTime) = await gpuSumTask;
-                ResultBox.AppendText($"Sum (GPU): {gpuSumResult}\n" +
-                                      $"Timespan (GPU): {gpuSumTime}");
+
+                GPUSumResultBox.Text = gpuSumResult.ToString();
+                GPUSumTimeBox.Text = gpuSumTime.ToString();
 
                 Task<(float, double)> cpuAvgTask = Task.Run(() => CPUCalculations.CalculateAverage(array));
                 (float cpuAvgResult, double cpuAvgTime) = await cpuAvgTask;
-                ResultBox.AppendText($"\nAverage (CPU): {cpuAvgResult}\n" +
-                                      $"Timespan (CPU): {cpuAvgTime}\n");
+
+                CPUAvgResultBox.Text = cpuAvgResult.ToString();
+                CPUAvgTimeBox.Text = cpuAvgTime.ToString();
 
                 Task<(float, double)> gpuAvgTask = Task.Run(() => GPUHandler.CalculateAverage(array));
-                (float gpuAvgResult, double gpAvgTime) = await gpuAvgTask;
-                ResultBox.AppendText($"Average (GPU): {gpuAvgResult}\n" +
-                                      $"Timespan (GPU): {gpAvgTime}");
+                (float gpuAvgResult, double gpuAvgTime) = await gpuAvgTask;
+
+                GPUAvgResultBox.Text = gpuAvgResult.ToString();
+                GPUAvgTimeBox.Text = gpuAvgTime.ToString();
 
                 Task<(float, double)> cpuMinTask = Task.Run(() => CPUCalculations.CalculateMin(array));
                 (float cpuMinResult, double cpuMinTime) = await cpuMinTask;
-                ResultBox.AppendText($"\nMinimum (CPU): {cpuMinResult}\n" +
-                                      $"Timespan (CPU): {cpuMinTime}\n");
+
+                CPUMinResultBox.Text = cpuMinResult.ToString();
+                CPUMinTimeBox.Text = cpuMinTime.ToString();
 
                 Task<(float, double)> gpuMinTask = Task.Run(() => GPUHandler.CalculateMin(array));
                 (float gpuMinResult, double gpuMinTime) = await gpuMinTask;
-                ResultBox.AppendText($"Minimum (GPU): {gpuMinResult}\n" +
-                                      $"Timespan (GPU): {gpuMinTime}");
+
+                GPUMinResultBox.Text = gpuMinResult.ToString();
+                GPUMinTimeBox.Text = gpuMinTime.ToString();
 
                 Task<(float, double)> cpuMaxTask = Task.Run(() => CPUCalculations.CalculateMax(array));
                 (float cpuMaxResult, double cpuMaxTime) = await cpuMaxTask;
-                ResultBox.AppendText($"\nMaximum (CPU): {cpuMaxResult}\n" +
-                                      $"Timespan (CPU): {cpuMaxTime}\n");
+
+                CPUMaxResultBox.Text = cpuMaxResult.ToString();
+                CPUMaxTimeBox.Text = cpuMaxTime.ToString();
 
                 Task<(float, double)> gpuMaxTask = Task.Run(() => GPUHandler.CalculateMax(array));
                 (float gpuMaxResult, double gpuMaxTime) = await gpuMaxTask;
-                ResultBox.AppendText($"Maximum (GPU): {gpuMaxResult}\n" +
-                                      $"Timespan (GPU): {gpuMaxTime}");
+
+                GPUMaxResultBox.Text = gpuMaxResult.ToString();
+                GPUMaxTimeBox.Text = gpuMaxTime.ToString();
 
                 Task<(float, double)> cpuMedianTask = Task.Run(() => CPUCalculations.CalculateMedian(array));
                 (float cpuMedianResult, double cpuMedianTime) = await cpuMedianTask;
-                ResultBox.AppendText($"\nMedian (CPU): {cpuMedianResult}\n" +
-                                      $"Timespan (CPU): {cpuMedianTime}\n");
+
+                CPUMedianResultBox.Text = cpuMedianResult.ToString();
+                CPUMedianTimeBox.Text = cpuMedianTime.ToString();
 
                 Task<(float, double)> gpuMedianTask = Task.Run(() => GPUHandler.CalculateMedian(array));
                 (float gpuMedianResult, double gpuMedianTime) = await gpuMedianTask;
-                ResultBox.AppendText($"Median (GPU): {gpuMedianResult}\n" +
-                                      $"Timespan (GPU): {gpuMedianTime}");
+
+                GPUMedianResultBox.Text = gpuMedianResult.ToString();
+                GPUMedianTimeBox.Text = gpuMedianTime.ToString();
 
                 IsInSequence = false;
                 AsyncBar.Visibility = Visibility.Collapsed;
@@ -117,8 +128,7 @@ namespace GPUStatistics
             catch (Exception ex)
             {
                 IsInSequence = false;
-                AsyncBar.Visibility = Visibility.Collapsed;
-                ResultBox.Document.Blocks.Clear();
+                HideComponents();
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

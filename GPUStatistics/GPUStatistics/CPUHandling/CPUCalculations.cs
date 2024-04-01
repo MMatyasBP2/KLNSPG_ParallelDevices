@@ -29,7 +29,7 @@ namespace GPUStatistics.CPUHandling
         {
             Stopwatch cpuStopwatch = new Stopwatch();
             cpuStopwatch.Start();
-            float cpuMedian = array.Median();
+            float cpuMedian = Median(array);
             cpuStopwatch.Stop();
             double medianCpuComputationTime = cpuStopwatch.Elapsed.TotalMilliseconds;
             return (cpuMedian, medianCpuComputationTime);
@@ -53,6 +53,22 @@ namespace GPUStatistics.CPUHandling
             cpuStopwatch.Stop();
             double sumCpuComputationTime = cpuStopwatch.Elapsed.TotalMilliseconds;
             return (cpuSum, sumCpuComputationTime);
+        }
+
+        private float Median(float[] numbers)
+        {
+            Array.Sort(numbers);
+
+            float median;
+            if (numbers.Length % 2 == 0)
+            {
+                int middleIndex = numbers.Length / 2;
+                median = (numbers[middleIndex - 1] + numbers[middleIndex]) / 2.0f;
+            }
+            else
+                median = numbers[numbers.Length / 2];
+
+            return median;
         }
     }
 }

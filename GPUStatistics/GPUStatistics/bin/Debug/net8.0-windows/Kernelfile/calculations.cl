@@ -122,55 +122,33 @@ __kernel void CalculateSumAndAverage(__global const float* array, __global float
     }
 }
 
-__kernel void CalcMedian(__global float* arr, __global float* result, const int size) {
-    int tid = get_global_id(0);
-    int local_id = get_local_id(0);
-    int group_size = get_local_size(0);
-
-    __local float localMed[256];
-
-    // Step 1: Parallel reduction to find median
-    float median = 0.0;
-    for(int i = tid; i < size; i += get_global_size(0)) {
-        // Perform prefix sum to find cumulative sum
-        arr[i] += (i > 0) ? arr[i - 1] : 0;
-    }
-    barrier(CLK_LOCAL_MEM_FENCE);
-
-    // Step 2: Determine median
-    if (tid < size) {
-        // Perform binary search to find median
-        int low = 0;
-        int high = size - 1;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            float leftSum = (mid > 0) ? arr[mid - 1] : 0;
-            float rightSum = arr[size - 1] - arr[mid];
-            if (leftSum <= rightSum && rightSum <= leftSum + arr[mid]) {
-                median = arr[mid];
-                break;
-            } else if (leftSum < rightSum) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
+__kernel void CalcMedian(__global float* numbers, __global float* result, int length)
+{
+    // Sort the array
+    for (int i = 0; i < get_global_id(0); i++)
+    {
+        for (int j = 0; j < get_global_id(0)- i - 1; j++)
+        {
+            if (numbers[j] > numbers[j + 1])
+            {
+                float temp = numbers[j];
+                numbers[j] = numbers[j + 1];
+                numbers[j + 1] = temp;
             }
         }
     }
 
-    // Step 3: Store median in local memory
-    localMed[local_id] = median;
-    barrier(CLK_LOCAL_MEM_FENCE);
-
-    // Step 4: Perform parallel reduction to find overall median
-    for(int stride = group_size / 2; stride > 0; stride >>= 1) {
-        if(local_id < stride) {
-            localMed[local_id] += localMed[local_id + stride];
-        }
-        barrier(CLK_LOCAL_MEM_FENCE);
+    // Calculate the median
+    float median;
+    if (length % 2 == 0)
+    {
+        // If the number of elements is even, take the average of the two middle elements
+        int middleIndex = length / 2;
+        median = (numbers[middleIndex - 1] + numbers[middleIndex]) / 2.0f;
     }
+    else
+        median = numbers[length / 2];
 
-    // Step 5: Store overall median
-    if(local_id == 0) {
-        result[get_group_id(0)] = localMed[0] / size;
-    }
+    // Store the median in the result array
+    result[0] = median;
 }
