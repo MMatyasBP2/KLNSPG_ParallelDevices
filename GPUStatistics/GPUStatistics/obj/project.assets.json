@@ -139,6 +139,7 @@
   "projectFileDependencyGroups": {
     "net8.0-windows7.0": [
       "Cloo.clSharp >= 1.0.1",
+      "LiveCharts >= 0.9.7",
       "LiveCharts.Wpf >= 0.9.7",
       "MathNet.Numerics >= 5.0.0"
     ]
@@ -196,6 +197,10 @@
           "Cloo.clSharp": {
             "target": "Package",
             "version": "[1.0.1, )"
+          },
+          "LiveCharts": {
+            "target": "Package",
+            "version": "[0.9.7, )"
           },
           "LiveCharts.Wpf": {
             "target": "Package",

@@ -1,8 +1,12 @@
 ﻿using GPUStatistics.CPUHandling;
 using GPUStatistics.GPUHandling;
+using LiveCharts.Defaults;
+using LiveCharts.Wpf;
+using LiveCharts;
 using MathNet.Numerics.Distributions;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace GPUStatistics
 {

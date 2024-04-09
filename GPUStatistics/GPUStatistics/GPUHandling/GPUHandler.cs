@@ -1,7 +1,6 @@
 ﻿using Cloo;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
 
 namespace GPUStatistics.GPUHandling
 {
@@ -71,15 +70,23 @@ namespace GPUStatistics.GPUHandling
 
         private void ExecuteKernel(ComputeKernel kernel, ComputeBuffer<float> inputBuffer, ComputeBuffer<float> outputBuffer, ComputeCommandQueue queue, long arraySize, int numberOfGroups, Stopwatch gpuStopwatch)
         {
-            gpuStopwatch.Start();
+            try
+            {
+                gpuStopwatch.Start();
 
-            long[] globalWorkSize = new long[] { numberOfGroups * WorkGroupSize };
-            long[] localWorkSize = new long[] { WorkGroupSize };
+                long[] globalWorkSize = new long[] { numberOfGroups * WorkGroupSize };
+                long[] localWorkSize = new long[] { WorkGroupSize };
 
-            queue.Execute(kernel, null, globalWorkSize, localWorkSize, null);
+                queue.Execute(kernel, null, globalWorkSize, localWorkSize, null);
 
-            gpuStopwatch.Stop();
-            SetGpuComputationTime(gpuStopwatch);
+                gpuStopwatch.Stop();
+                SetGpuComputationTime(gpuStopwatch);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
         private float CalculateSumFromResultBuffer(ComputeBuffer<float> resultBuffer, ComputeCommandQueue queue, int numberOfGroups)
@@ -136,9 +143,10 @@ namespace GPUStatistics.GPUHandling
             gpuStopwatch.Start();
         }
 
-        private void CleanupResources(ComputeKernel kernel, ComputeBuffer<float> arrayBuffer, ComputeBuffer<float> resultBuffer)
+        private void CleanupResources(ComputeKernel kernel, ComputeCommandQueue queue, ComputeBuffer<float> arrayBuffer, ComputeBuffer<float> resultBuffer)
         {
             kernel.Dispose();
+            queue.Dispose();
             arrayBuffer.Dispose();
             resultBuffer.Dispose();
         }
@@ -173,7 +181,9 @@ namespace GPUStatistics.GPUHandling
                 float gpuSum = CalculateSumFromResultBuffer(resultBuffer, queue, numberOfGroups);
                 double sumGpuComputationTime = GetGpuComputationTime(sw);
 
-                CleanupResources(sumKernel, arrayBuffer, resultBuffer);
+                CleanupResources(sumKernel, queue, arrayBuffer, resultBuffer);
+
+                Trace.WriteLine("Process 20");
 
                 return (gpuSum, sumGpuComputationTime);
             }
@@ -203,7 +213,9 @@ namespace GPUStatistics.GPUHandling
                 float average = CalculateAverageFromResultBuffer(resultBuffer, queue, arraySize);
                 double averageGpuComputationTime = GetGpuComputationTime(sw);
 
-                CleanupResources(averageKernel, arrayBuffer, resultBuffer);
+                CleanupResources(averageKernel, queue, arrayBuffer, resultBuffer);
+
+                Trace.WriteLine("Process 40");
 
                 return (average, averageGpuComputationTime);
             }
@@ -232,7 +244,9 @@ namespace GPUStatistics.GPUHandling
 
                 float min = CalculateMinimumFromResultBuffer(resultBuffer, queue, arraySize);
                 double minimumGpuComputationTime = GetGpuComputationTime(sw);
-                CleanupResources(minKernel, arrayBuffer, resultBuffer);
+                CleanupResources(minKernel, queue, arrayBuffer, resultBuffer);
+
+                Trace.WriteLine("Process 50");
 
                 return (min, minimumGpuComputationTime);
             }
@@ -261,7 +275,9 @@ namespace GPUStatistics.GPUHandling
 
                 float max = CalculateMaximumFromResultBuffer(resultBuffer, queue, arraySize);
                 double maximumGpuComputationTime = GetGpuComputationTime(sw);
-                CleanupResources(maxKernel, arrayBuffer, resultBuffer);
+                CleanupResources(maxKernel, queue, arrayBuffer, resultBuffer);
+
+                Trace.WriteLine("Process 70");
 
                 return (max, maximumGpuComputationTime);
             }
@@ -289,7 +305,9 @@ namespace GPUStatistics.GPUHandling
 
                 float median = CalculateMedianFromResultBuffer(resultBuffer, queue, arraySize);
                 double medianGpuComputationTime = GetGpuComputationTime(sw);
-                CleanupResources(medianKernel, arrayBuffer, resultBuffer);
+                CleanupResources(medianKernel, queue, arrayBuffer, resultBuffer);
+
+                Trace.WriteLine("Process 100");
 
                 return (median, medianGpuComputationTime);
             }

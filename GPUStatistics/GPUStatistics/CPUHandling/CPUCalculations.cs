@@ -1,5 +1,4 @@
-﻿using MathNet.Numerics.Statistics;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace GPUStatistics.CPUHandling
 {
@@ -12,6 +11,7 @@ namespace GPUStatistics.CPUHandling
             float cpuAverage = array.Average();
             cpuStopwatch.Stop();
             double averageCpuComputationTime = cpuStopwatch.Elapsed.TotalMilliseconds;
+            Trace.WriteLine("Process 30");
             return (cpuAverage, averageCpuComputationTime);
         }
 
@@ -22,6 +22,7 @@ namespace GPUStatistics.CPUHandling
             float cpuMax = array.Max();
             cpuStopwatch.Stop();
             double maxCpuComputationTime = cpuStopwatch.Elapsed.TotalMilliseconds;
+            Trace.WriteLine("Process 60");
             return (cpuMax, maxCpuComputationTime);
         }
 
@@ -32,6 +33,7 @@ namespace GPUStatistics.CPUHandling
             float cpuMedian = Median(array);
             cpuStopwatch.Stop();
             double medianCpuComputationTime = cpuStopwatch.Elapsed.TotalMilliseconds;
+            Trace.WriteLine("Process 80");
             return (cpuMedian, medianCpuComputationTime);
         }
 
@@ -42,6 +44,7 @@ namespace GPUStatistics.CPUHandling
             float cpuMin = array.Min();
             cpuStopwatch.Stop();
             double minCpuComputationTime = cpuStopwatch.Elapsed.TotalMilliseconds;
+            Trace.WriteLine("Process 40");
             return (cpuMin, minCpuComputationTime);
         }
 
@@ -52,6 +55,7 @@ namespace GPUStatistics.CPUHandling
             float cpuSum = array.Sum();
             cpuStopwatch.Stop();
             double sumCpuComputationTime = cpuStopwatch.Elapsed.TotalMilliseconds;
+            Trace.WriteLine("Process 10");
             return (cpuSum, sumCpuComputationTime);
         }
 

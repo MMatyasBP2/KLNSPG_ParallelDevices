@@ -23,3 +23,5 @@ C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\bin\Debug\net8.0-
 C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\obj\Debug\net8.0-windows\GPUStatistics.csproj.AssemblyReference.cache
 C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\obj\Debug\net8.0-windows\GPUStati.03C7EB62.Up2Date
 C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\bin\Debug\net8.0-windows\MathNet.Numerics.dll
+C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\bin\Debug\net8.0-windows\LiveCharts.dll
+C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\bin\Debug\net8.0-windows\LiveCharts.Wpf.dll

@@ -124,7 +124,6 @@ __kernel void CalculateSumAndAverage(__global const float* array, __global float
 
 __kernel void CalcMedian(__global float* numbers, __global float* result, int length)
 {
-    // Sort the array
     for (int i = 0; i < get_global_id(0); i++)
     {
         for (int j = 0; j < get_global_id(0)- i - 1; j++)
@@ -138,7 +137,6 @@ __kernel void CalcMedian(__global float* numbers, __global float* result, int le
         }
     }
 
-    // Calculate the median
     float median;
     if (length % 2 == 0)
     {
