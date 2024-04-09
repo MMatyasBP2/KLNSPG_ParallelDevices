@@ -20,6 +20,7 @@ namespace GPUStatistics
         public GPUHandler GPUHandler { get; set; }
         public CPUCalculations CPUCalculations { get; set; }
 
+
         public MainWindow()
         {
             try
