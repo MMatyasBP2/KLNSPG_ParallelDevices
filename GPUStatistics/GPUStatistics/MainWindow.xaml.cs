@@ -1,12 +1,9 @@
 ﻿using GPUStatistics.CPUHandling;
 using GPUStatistics.GPUHandling;
-using LiveCharts.Defaults;
-using LiveCharts.Wpf;
-using LiveCharts;
 using MathNet.Numerics.Distributions;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
+using System.IO;
 
 namespace GPUStatistics
 {
@@ -19,7 +16,6 @@ namespace GPUStatistics
         public static MainWindow main;
         public GPUHandler GPUHandler { get; set; }
         public CPUCalculations CPUCalculations { get; set; }
-
 
         public MainWindow()
         {
@@ -127,6 +123,22 @@ namespace GPUStatistics
                 GPUMedianResultBox.Text = gpuMedianResult.ToString();
                 GPUMedianTimeBox.Text = gpuMedianTime.ToString();
 
+                Dictionary<string, Tuple<float, double>> results = new Dictionary<string, Tuple<float, double>>
+                {
+                    { "CPU Sum", Tuple.Create(cpuSumResult, cpuSumTime) },
+                    { "GPU Sum", Tuple.Create(gpuSumResult, gpuSumTime) },
+                    { "CPU Avg", Tuple.Create(cpuAvgResult, cpuAvgTime) },
+                    { "GPU Avg", Tuple.Create(gpuAvgResult, gpuAvgTime) },
+                    { "CPU Min", Tuple.Create(cpuMinResult, cpuMinTime) },
+                    { "GPU Min", Tuple.Create(gpuMinResult, gpuMinTime) },
+                    { "CPU Max", Tuple.Create(cpuMaxResult, cpuMaxTime) },
+                    { "GPU Max", Tuple.Create(gpuMaxResult, gpuMaxTime) },
+                    { "CPU Median", Tuple.Create(cpuMedianResult, cpuMedianTime) },
+                    { "GPU Median", Tuple.Create(gpuMedianResult, gpuMedianTime) }
+                };
+
+                GenerateCSV(results);
+
                 IsInSequence = false;
                 AsyncBar.Visibility = Visibility.Collapsed;
             }
@@ -135,6 +147,22 @@ namespace GPUStatistics
                 IsInSequence = false;
                 HideComponents();
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void GenerateCSV(Dictionary<string, Tuple<float, double>> results)
+        {
+            string csvFilePath = "results.csv";
+            using (StreamWriter writer = new StreamWriter(csvFilePath, append: true))
+            {
+                // Write the header
+                writer.WriteLine("Calculation; Result; Time");
+
+                // Iterate over the dictionary and write the results and times
+                foreach (KeyValuePair<string, Tuple<float, double>> entry in results)
+                {
+                    writer.WriteLine($"{entry.Key}; {entry.Value.Item1}; {entry.Value.Item2}");
+                }
             }
         }
 

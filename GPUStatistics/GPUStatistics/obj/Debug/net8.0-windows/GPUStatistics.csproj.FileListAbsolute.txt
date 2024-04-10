@@ -6,7 +6,6 @@ C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\bin\Debug\net8.0-
 C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\obj\Debug\net8.0-windows\MainWindow.g.cs
 C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\obj\Debug\net8.0-windows\App.g.cs
 C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\obj\Debug\net8.0-windows\GPUStatistics_MarkupCompile.cache
-C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\obj\Debug\net8.0-windows\GPUStatistics_MarkupCompile.lref
 C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\obj\Debug\net8.0-windows\MainWindow.baml
 C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\obj\Debug\net8.0-windows\GPUStatistics.g.resources
 C:\projects\KLNSPG_ParallelDevices\GPUStatistics\GPUStatistics\obj\Debug\net8.0-windows\GPUStatistics.GeneratedMSBuildEditorConfig.editorconfig
